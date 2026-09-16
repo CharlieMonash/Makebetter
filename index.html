@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paediatrics AST StAMPS Study Command Centre</title>
+<style>
+:root {
+  --bg:#f4f5f1; --panel:#ffffff; --ink:#192218; --muted:#687268;
+  --green:#355b2d; --green2:#6f8f63; --pale:#e8eee3; --line:#dce2d8;
+  --amber:#9a6d16; --red:#a8463d; --blue:#486b7a; --shadow:0 8px 25px rgba(31,45,28,.07);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;background:#243923;color:#fff;padding:24px 16px;display:flex;flex-direction:column}
+.brand{font-size:18px;font-weight:800;line-height:1.15;margin:0 8px 22px}
+.brand span{display:block;color:#b9cbae;font-weight:600;font-size:12px;margin-top:6px;letter-spacing:.04em;text-transform:uppercase}
+.nav button{width:100%;border:0;background:transparent;color:#dfe8db;padding:11px 12px;text-align:left;border-radius:9px;margin:2px 0}
+.nav button:hover,.nav button.active{background:#3a5637;color:#fff}
+.side-note{margin-top:auto;font-size:12px;line-height:1.45;color:#c9d5c5;padding:12px}
+.main{padding:26px 30px 60px;max-width:1500px;width:100%;margin:auto}
+.section{display:none} .section.active{display:block}
+.topbar{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;margin-bottom:22px}
+h1{font-size:30px;margin:0 0 5px;letter-spacing:-.03em} h2{font-size:21px;margin:0 0 14px} h3{font-size:15px;margin:0 0 9px}
+.subtitle{color:var(--muted);font-size:14px;max-width:820px;line-height:1.5}
+.pill{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;background:var(--pale);color:var(--green);font-size:12px;font-weight:700}
+.pill.red{background:#f5e5e2;color:var(--red)} .pill.amber{background:#f7edd9;color:var(--amber)} .pill.blue{background:#e5eef2;color:var(--blue)}
+.grid{display:grid;gap:16px} .grid.kpis{grid-template-columns:repeat(4,minmax(0,1fr))} .grid.two{grid-template-columns:1fr 1fr} .grid.three{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
+.kpi .big{font-size:30px;font-weight:800;letter-spacing:-.04em;margin:5px 0} .kpi small{color:var(--muted)}
+.progress{height:8px;background:#edf0eb;border-radius:999px;overflow:hidden;margin-top:10px} .progress > span{height:100%;display:block;background:var(--green);border-radius:999px}
+.today{border-left:4px solid var(--green)} .task{display:flex;gap:10px;padding:10px 0;border-top:1px solid #eef0ec;align-items:flex-start} .task:first-of-type{border-top:0}
+.checkbox{width:19px;height:19px;border:1px solid #b7c1b2;border-radius:5px;display:flex;align-items:center;justify-content:center;flex:0 0 19px;margin-top:1px}
+.task.done .checkbox{background:var(--green);color:white} .task.done .task-text{text-decoration:line-through;color:#8a9188}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:white;padding:8px 11px;border-radius:8px;color:var(--ink);font-weight:650;font-size:13px}
+.btn.primary{background:var(--green);border-color:var(--green);color:white} .btn.danger{color:var(--red)} .btn.small{padding:6px 8px;font-size:12px}
+.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff}
+select,input[type="number"],input[type="date"],input[type="text"],textarea{border:1px solid var(--line);border-radius:8px;padding:8px 9px;background:white;color:var(--ink)}
+textarea{width:100%;min-height:84px;resize:vertical}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.topic-group{margin-bottom:12px} .topic-head{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;background:#e9eee6;border-radius:10px;font-weight:750}
+.topic-list{background:white;border:1px solid var(--line);border-top:0;border-radius:0 0 10px 10px;overflow:hidden}
+.topic-row{display:grid;grid-template-columns:minmax(250px,1fr) 130px 115px 95px;gap:8px;align-items:center;padding:9px 12px;border-top:1px solid #edf0eb;font-size:13px}
+.topic-row:first-child{border-top:0}
+.status-select,.priority-select{width:100%;padding:6px;border-radius:7px;border:1px solid var(--line);font-size:12px}
+.badge{font-size:11px;padding:4px 7px;border-radius:999px;background:#f0f2ef;color:#657064;display:inline-block}
+.case-card{padding:14px;border:1px solid var(--line);border-radius:11px;margin-bottom:10px;background:#fff}
+.case-head{display:flex;justify-content:space-between;gap:10px} .case-title{font-weight:800} .meta{color:var(--muted);font-size:12px;margin-top:4px}
+.score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px} .score-box{background:#f6f7f4;border-radius:8px;padding:8px;text-align:center} .score-box b{display:block;font-size:18px}
+.context-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px} .ctx{border:1px solid var(--line);border-radius:9px;padding:10px;background:white} .ctx strong{display:block;font-size:13px;margin-bottom:4px} .ctx span{font-size:12px;color:var(--muted);line-height:1.4}
+.callout{padding:14px 15px;background:#eef2eb;border-left:4px solid var(--green);border-radius:8px;line-height:1.5;font-size:13px}
+.rubric{display:grid;grid-template-columns:180px 1fr 130px;gap:12px;padding:12px 0;border-top:1px solid var(--line);align-items:start} .rubric:first-child{border-top:0}
+table{width:100%;border-collapse:collapse;font-size:13px} th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);vertical-align:top} th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.timeline{position:relative;padding-left:18px} .phase{padding:0 0 18px 18px;border-left:2px solid #ccd8c6;position:relative} .phase:before{content:"";width:10px;height:10px;background:var(--green);border-radius:50%;position:absolute;left:-6px;top:3px} .phase:last-child{border-left-color:transparent}
+.phase b{font-size:13px} .phase p{font-size:13px;color:var(--muted);line-height:1.45;margin:5px 0 0}
+.anki-form{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end}
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.mini-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #edf0eb;font-size:13px} .mini-stat:last-child{border-bottom:0}
+.modal{position:fixed;inset:0;background:rgba(17,26,17,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
+.modal.open{display:flex} .modal-card{background:white;border-radius:14px;padding:20px;width:min(780px,100%);max-height:92vh;overflow:auto;box-shadow:0 20px 70px rgba(0,0,0,.2)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px} .form-grid .full{grid-column:1/-1}
+.check-list{display:grid;grid-template-columns:1fr 1fr;gap:6px} .check-line{font-size:12px;display:flex;gap:7px;align-items:flex-start;padding:5px 0}
+.empty{color:var(--muted);text-align:center;padding:25px;font-size:13px}
+.footer-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.source-link{color:var(--green);font-weight:700;text-decoration:none} .source-link:hover{text-decoration:underline}
+.note{font-size:12px;color:var(--muted);line-height:1.45}
+
+.casebank-controls{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.bank-row{display:grid;grid-template-columns:34px minmax(250px,1fr) 175px 72px 105px 125px 115px;gap:9px;align-items:center;padding:11px 12px;border-top:1px solid #edf0eb;font-size:13px}
+.bank-row:first-child{border-top:0}
+.bigcheck{width:21px;height:21px;accent-color:var(--green)}
+.bank-title{font-weight:750}
+.bank-done .bank-title{text-decoration:line-through;color:#788077}
+.feedback-check{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.outcome-major{background:#f7e3e0;color:#9d3c34}.outcome-repeat{background:#f7edd9;color:#946815}.outcome-solid{background:#e8f0e4;color:#42643a}.outcome-ready{background:#dfece1;color:#2f6038}
+.queue-item{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #edf0eb}.queue-item:last-child{border-bottom:0}
+.weak-bar{height:7px;background:#edf0eb;border-radius:99px;overflow:hidden;margin-top:5px}.weak-bar span{height:100%;display:block;background:var(--green)}
+.attempt-history{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+
+.mastery-select{width:100%;padding:6px;border-radius:7px;border:1px solid var(--line);font-size:12px}
+@media(max-width:950px){.bank-row{grid-template-columns:34px 1fr 130px}.bank-source,.bank-domain,.bank-practice,.bank-extra{grid-column:2/-1}.casebank-controls{grid-template-columns:1fr}}
+
+@media(max-width:1050px){.grid.kpis{grid-template-columns:1fr 1fr} .grid.two,.grid.three{grid-template-columns:1fr} .score-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){
+ .app{display:block} .sidebar{position:relative;height:auto;padding:15px} .nav{display:flex;overflow:auto;gap:3px} .nav button{white-space:nowrap;width:auto} .side-note{display:none}
+ .main{padding:18px 14px 50px} .grid.kpis{grid-template-columns:1fr 1fr} .filters{grid-template-columns:1fr} .topic-row{grid-template-columns:1fr} .context-grid{grid-template-columns:1fr} .rubric{grid-template-columns:1fr} .anki-form{grid-template-columns:1fr 1fr} .form-grid{grid-template-columns:1fr} .form-grid .full{grid-column:auto}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">Paeds AST StAMPS<span>Study Command Centre</span></div>
+  <div class="nav">
+    <button data-section="home" class="active">Overview</button>
+    <button data-section="curriculum">Curriculum map</button>
+    <button data-section="casebank">Case bank</button>
+    <button data-section="cases">Case feedback log</button>
+    <button data-section="rubric">Rubric</button>
+    <button data-section="stampsville">StAMPSville</button>
+    <button data-section="past">Past exam intelligence</button>
+    <button data-section="plan">Study plan</button>
+    <button data-section="resources">Resources + Anki</button>
+  </div>
+  <div class="side-note">Exam: 10 October 2026<br>Data is stored in this browser. Export a backup regularly.</div>
+</aside>
+
+<main class="main">
+<section id="home" class="section active">
+ <div class="topbar">
+  <div><h1>Exam readiness</h1><div class="subtitle">The dashboard is designed around the actual task: deliver safe, decisive paediatric care as the senior rural doctor, not simply recall paediatric facts.</div></div>
+  <span class="pill" id="phasePill">Current phase</span>
+ </div>
+ <div class="grid kpis">
+  <div class="card kpi"><small>Days to exam</small><div class="big" id="daysLeft">—</div><div class="progress"><span id="timeBar" style="width:0%"></span></div></div>
+  <div class="card kpi"><small>Curriculum exam-ready</small><div class="big" id="coverageKpi">0%</div><div class="progress"><span id="coverageBar" style="width:0%"></span></div></div>
+  <div class="card kpi"><small>Timed cases logged</small><div class="big" id="casesKpi">0</div><small id="caseAvg">No rubric average yet</small></div>
+  <div class="card kpi"><small>StAMPSville context rate</small><div class="big" id="contextKpi">0%</div><small>Across logged cases</small></div>
+ </div>
+
+ <div class="grid two" style="margin-top:16px">
+   <div class="card today">
+    <div class="row" style="justify-content:space-between"><h2>Today</h2><span class="pill" id="todayDate"></span></div>
+    <div id="todayTasks"></div>
+    <div class="row" style="margin-top:10px"><button class="btn small" id="resetToday">Reset today</button></div>
+   </div>
+   <div class="card">
+    <h2>Readiness gaps</h2>
+    <div id="gaps"></div>
+   </div>
+ </div>
+
+ <div class="grid two" style="margin-top:16px">
+   <div class="card">
+    <h2>Non-negotiables in every case</h2>
+    <div class="callout"><b>Clinical answer + rural context + senior leadership + continuity.</b><br>
+    If retrieval is plausible, call early and keep treating while transfer is organised. If the child can stay, state why StAMPSville has the capability and give a concrete review plan.</div>
+    <div id="coreContextMini" style="margin-top:10px"></div>
+   </div>
+   <div class="card">
+    <h2>Recent case performance</h2>
+    <div id="recentCases"></div>
+   </div>
+ </div>
+</section>
+
+<section id="curriculum" class="section">
+ <div class="topbar">
+  <div><h1>Curriculum map</h1><div class="subtitle">Status every examinable area. “Exam ready” means you can manage it aloud, in StAMPSville, without relying on a prompt.</div></div>
+  <div class="row"><button class="btn" id="collapseAll">Collapse all</button><button class="btn" id="expandAll">Expand all</button></div>
+ </div>
+ <div class="filters">
+   <input class="search" id="topicSearch" placeholder="Search topic…">
+   <select id="statusFilter"><option value="">All statuses</option><option>Not started</option><option>Learning</option><option>Can manage</option><option>Exam ready</option></select>
+   <select id="priorityFilter"><option value="">All priorities</option><option>High</option><option>Medium</option><option>Low</option></select>
+ </div>
+ <div class="grid kpis" style="margin-bottom:14px">
+   <div class="card kpi"><small>Total topics</small><div class="big" id="topicTotal">0</div></div>
+   <div class="card kpi"><small>Not started</small><div class="big" id="topicNot">0</div></div>
+   <div class="card kpi"><small>Can manage</small><div class="big" id="topicManage">0</div></div>
+   <div class="card kpi"><small>Exam ready</small><div class="big" id="topicReady">0</div></div>
+ </div>
+ <div id="curriculumContainer"></div>
+</section>
+
+
+<section id="casebank" class="section">
+ <div class="topbar">
+  <div><h1>Case bank</h1><div class="subtitle">Cases extracted from your uploaded ACRRM examples, public reports and practice/past-case list, plus all 100 presentations from <i>100 Cases in Paediatrics</i>. Use the book for case practice, but verify current management and medication details against RCH, Therapeutic Guidelines and AMH.</div></div>
+ </div>
+ <div class="grid kpis" style="margin-bottom:16px">
+   <div class="card kpi"><small>Cases extracted</small><div class="big" id="bankTotal">0</div></div>
+   <div class="card kpi"><small>Done aloud</small><div class="big" id="bankDone">0</div></div>
+   <div class="card kpi"><small>Feedback received</small><div class="big" id="bankFeedback">0</div></div>
+   <div class="card kpi"><small>Exam ready</small><div class="big" id="bankReady">0</div></div>
+ </div>
+ <div class="grid two" style="margin-bottom:16px">
+   <div class="card"><h2>Repeat queue</h2><div id="repeatQueue"></div></div>
+   <div class="card"><h2>Recurring weak areas</h2><div id="weakPatterns"></div></div>
+ </div>
+ <div class="card" style="margin-bottom:16px"><h2>Topic coverage from cases</h2><div id="topicCoverage"></div></div>
+ <div class="callout" style="margin-bottom:16px"><b>Repeat scheduling rule:</b> Major gaps → 1 day; Needs repeat → 3 days; Solid → 7 days for confirmation; Exam ready → 14-day maintenance check. This is a study scheduling heuristic, not an ACRRM pass threshold.</div>
+ <div class="casebank-controls">
+   <input class="search" id="bankSearch" placeholder="Search cases, source or domain…">
+   <select id="bankSource"><option value="">All sources</option><option>ACRRM example</option><option>2024 public report</option><option>2025 public report</option><option>Uploaded practice / past-case list</option><option>100 Cases in Paediatrics</option></select>
+   <select id="bankDomain"><option value="">All domains</option></select>
+   <select id="bankView"><option value="">All cases</option><option value="notdone">Not attempted</option><option value="due">Due to repeat</option><option value="repeat">Needs repeat</option><option value="ready">Exam ready</option></select>
+ </div>
+ <div class="card" style="padding:0;overflow:hidden">
+   <div id="caseBankList"></div>
+ </div>
+ <div class="callout" style="margin-top:16px"><b>Best workflow:</b> choose a case here → practise it aloud in ChatGPT → get feedback → return here and tick Done + Feedback, then set it to Needs repeat or Exam ready. The dashboard tracks coverage; ChatGPT does the nuanced marking and coaching.</div>
+</section>
+
+<section id="cases" class="section">
+ <div class="topbar">
+  <div><h1>Case feedback log</h1><div class="subtitle">Use this after spoken practice to keep the detailed score and repair notes. The Case Bank above is the simple tick-box coverage tracker. Score cases against the current five official domains, then separately audit StAMPSville context. The second score shows why an answer that is clinically correct may still be a weak StAMPS answer.</div></div>
+  <button class="btn primary" id="addCaseBtn">+ Log case</button>
+ </div>
+ <div class="grid kpis" style="margin-bottom:16px">
+  <div class="card kpi"><small>Total cases</small><div class="big" id="caseTotal">0</div></div>
+  <div class="card kpi"><small>Average / 35</small><div class="big" id="caseScoreAvg">—</div></div>
+  <div class="card kpi"><small>Weakest rubric domain</small><div class="big" id="weakDomain" style="font-size:20px">—</div></div>
+  <div class="card kpi"><small>Repeat due</small><div class="big" id="repeatDue">0</div></div>
+ </div>
+ <div id="caseList"></div>
+</section>
+
+<section id="rubric" class="section">
+ <div class="topbar"><div><h1>StAMPS marking rubric</h1><div class="subtitle">Each scenario gives up to 7 points in five independently scored domains. The three management domains must incorporate relevant medical and rural contextual factors.</div></div></div>
+ <div class="card">
+  <div class="rubric"><b>Management — Part 1</b><span>Answer exactly the first question asked. Prioritise the immediate problem, safe management and StAMPSville-specific capability / constraints.</span><span class="pill">0–7</span></div>
+  <div class="rubric"><b>Management — Part 2</b><span>Advance the case as new information appears. Re-rank the differential, interpret results and change management decisively.</span><span class="pill">0–7</span></div>
+  <div class="rubric"><b>Management — Part 3</b><span>Complete the episode: definitive care, escalation / retrieval where needed, discharge / prevention / follow-up and continuity.</span><span class="pill">0–7</span></div>
+  <div class="rubric"><b>Problem definition & systematic approach</b><span>Define what the problem is before listing actions. Be structured without sounding formulaic. Prioritise dangerous and likely diagnoses, then use findings to narrow them.</span><span class="pill">0–7</span></div>
+  <div class="rubric"><b>Communication & professionalism</b><span>Speak clearly as the senior doctor, use age-appropriate and family-centred communication, cultural safety, confidentiality, consent and collegial leadership.</span><span class="pill">0–7</span></div>
+ </div>
+ <div class="grid two" style="margin-top:16px">
+  <div class="card"><h2>What the public reports repeatedly emphasise</h2>
+    <div class="mini-stat"><span>Definitive care within scope</span><b>Required</b></div>
+    <div class="mini-stat"><span>Know when additional support is needed</span><b>Required</b></div>
+    <div class="mini-stat"><span>Interpret common investigations contextually</span><b>Required</b></div>
+    <div class="mini-stat"><span>Describe curriculum procedures</span><b>Required</b></div>
+    <div class="mini-stat"><span>Continuity of care</span><b>Required</b></div>
+    <div class="mini-stat"><span>Communication + cultural safety</span><b>Required</b></div>
+    <div class="mini-stat"><span>Support more remote colleagues via telehealth</span><b>Required</b></div>
+  </div>
+  <div class="card"><h2>Self-marking rule</h2>
+   <div class="callout">Do not reward yourself for “mentioning” a concept. Give yourself the mark only if your spoken answer made the action operational: <b>who, what, when, where, and why in StAMPSville.</b></div>
+   <p class="note">Example: “I would consider retrieval” is weak. “Given persistent shock despite first-line resuscitation and a 600 km transfer, I would call aeromedical retrieval now, involve the receiving paediatric service, continue stabilisation locally and prepare for a prolonged wait if the aircraft is unavailable” demonstrates an actual plan.</p>
+  </div>
+ </div>
+</section>
+
+<section id="stampsville" class="section">
+ <div class="topbar"><div><h1>StAMPSville context</h1><div class="subtitle">Memorise this until it changes your management automatically. The exam asks you to place yourself in the role of the senior doctor for paediatrics at all times.</div></div>
+ <a class="btn source-link" href="https://www.acrrm.org.au/resources/assessment/stamps-community-profiles" target="_blank">Open current ACRRM profile ↗</a></div>
+ <div class="grid three">
+  <div class="card"><h3>Population</h3><div class="big" style="font-size:25px;font-weight:800">5,500</div><p class="note">4,000 in the city + 1,500 district. 24% are under 16. About 300 births/year. 35% identify as Aboriginal and Torres Strait Islander.</p></div>
+  <div class="card"><h3>Hospital</h3><div class="big" style="font-size:25px;font-weight:800">4 paediatric beds</div><p class="note">24/7 medically staffed ED, general ward, 4 obstetric beds, theatre, telehealth and outreach. No other locally based specialists.</p></div>
+  <div class="card"><h3>Distance</h3><div class="big" style="font-size:25px;font-weight:800">600 / 700 km</div><p class="note">600 km to the nearest base hospital and 700 km to the nearest major hospital. Fixed-wing aeromedical retrieval is subject to availability.</p></div>
+ </div>
+ <div class="context-grid" id="contextGrid" style="margin-top:16px"></div>
+</section>
+
+<section id="past" class="section">
+ <div class="topbar"><div><h1>Past exam intelligence</h1><div class="subtitle">Use prior topics to detect the breadth and style of cases, not to predict the next exam. The safest inference is that repeated domains — neonatal, development, respiratory, mental health and rural support — deserve fluent handling.</div></div></div>
+ <div class="card">
+  <table><thead><tr><th>Year</th><th>Paediatrics topic(s)</th><th>Domain</th><th>Your status</th></tr></thead><tbody id="pastTable"></tbody></table>
+ </div>
+ <div class="grid two" style="margin-top:16px">
+  <div class="card"><h2>What to learn from 2024–2025</h2>
+   <p class="note">The papers span acute illness, neonates, development, chronic care, mental health, prevention, remote support and procedural / safety issues. That argues against studying “likely diagnoses” only. Build flexible frameworks and broad curriculum coverage.</p>
+  </div>
+  <div class="card"><h2>Practice conversion</h2>
+   <p class="note">For every old question or 100 Cases chapter, rewrite it into three prompts: <b>(1)</b> initial assessment / differential, <b>(2)</b> investigation or deterioration, <b>(3)</b> definitive management / follow-up / rural complication. Then score all five rubric domains.</p>
+  </div>
+ </div>
+</section>
+
+<section id="plan" class="section">
+ <div class="topbar"><div><h1>Study plan to 10 October</h1><div class="subtitle">The balance shifts from coverage → integration → timed performance. Your roster can change the volume on a given day; it should not change the phase objective.</div></div></div>
+ <div class="grid two">
+  <div class="card"><h2>Phases</h2><div class="timeline" id="timeline"></div></div>
+  <div class="card">
+    <h2>Daily template</h2>
+    <div class="mini-stat"><span>Anki retrieval</span><b>20–30 min</b></div>
+    <div class="mini-stat"><span>Targeted content / guideline work</span><b>30–45 min</b></div>
+    <div class="mini-stat"><span>Spoken timed cases</span><b>2 cases minimum</b></div>
+    <div class="mini-stat"><span>Case debrief + Anki conversion</span><b>15–25 min</b></div>
+    <div class="mini-stat"><span>StAMPSville recall / context drill</span><b>5 min</b></div>
+    <p class="note">On heavy clinical days, protect Anki + one spoken case. On days off, do case blocks rather than extending passive reading.</p>
+  </div>
+ </div>
+</section>
+
+<section id="resources" class="section">
+ <div class="topbar"><div><h1>Resources + Anki</h1><div class="subtitle">Give each resource a job. Do not use five resources to answer the same question unless there is a genuine discrepancy or gap.</div></div>
+ <div class="row"><button class="btn" id="exportBtn">Export backup</button><label class="btn" for="importFile" style="margin:0;color:var(--ink);text-transform:none;letter-spacing:0">Import backup</label><input id="importFile" type="file" accept=".json" hidden></div></div>
+ <div class="grid two">
+  <div class="card"><h2>Resource stack</h2><div id="resourceList"></div></div>
+  <div>
+   <div class="card"><h2>Log Anki</h2>
+    <div class="anki-form">
+      <div><label>Date</label><input id="ankiDate" type="date"></div>
+      <div><label>Reviews</label><input id="ankiReviews" type="number" min="0" value="0"></div>
+      <div><label>New cards</label><input id="ankiNew" type="number" min="0" value="0"></div>
+      <button class="btn primary" id="ankiAdd">Add</button>
+    </div>
+   </div>
+   <div class="card" style="margin-top:16px"><h2>Anki trend</h2><div id="ankiStats"></div></div>
+   <div class="card" style="margin-top:16px"><h2>What belongs in Anki</h2>
+     <p class="note">Put in facts that must be instantly retrievable: age-specific normals, doses, fluid calculations, resuscitation numbers, diagnostic criteria, key red flags, mandatory actions and StAMPSville logistics. Do not turn whole management plans into giant cards — practise those as cases.</p>
+   </div>
+  </div>
+ </div>
+</section>
+</main>
+</div>
+
+<div class="modal" id="caseModal">
+ <div class="modal-card">
+  <div class="row" style="justify-content:space-between"><h2>Log a practice case</h2><button class="btn small" id="closeModal">Close</button></div>
+  <div class="form-grid">
+   <div><label>Date</label><input id="caseDate" type="date" style="width:100%"></div>
+   <div><label>Source</label><select id="caseSource" style="width:100%"><option>Past question</option><option>Akram / ACRRM practice</option><option>100 Cases in Paediatrics</option><option>Self-generated</option><option>Study group</option><option>Clinical case</option></select></div>
+   <div class="full"><label>Case / topic</label><input id="caseTitle" type="text" style="width:100%" placeholder="e.g. 6-week-old with fever"></div>
+   <div><label>Timed?</label><select id="caseTimed" style="width:100%"><option value="yes">Yes</option><option value="no">No</option></select></div>
+   <div><label>Repeat on</label><input id="caseRepeat" type="date" style="width:100%"></div>
+   <div><label>Management Part 1 / 7</label><input id="s1" type="number" min="0" max="7" value="4" style="width:100%"></div>
+   <div><label>Management Part 2 / 7</label><input id="s2" type="number" min="0" max="7" value="4" style="width:100%"></div>
+   <div><label>Management Part 3 / 7</label><input id="s3" type="number" min="0" max="7" value="4" style="width:100%"></div>
+   <div><label>Problem definition / 7</label><input id="s4" type="number" min="0" max="7" value="4" style="width:100%"></div>
+   <div><label>Communication / 7</label><input id="s5" type="number" min="0" max="7" value="4" style="width:100%"></div>
+   <div class="full"><label>StAMPSville / rural-context elements used</label><div class="check-list" id="modalContextChecks"></div></div>
+   <div class="full"><label>What I missed / need to repair</label><textarea id="caseNotes" placeholder="Specific errors only: missed retrieval threshold, didn't define severity, wrong dose, forgot cultural safety…"></textarea></div>
+  </div>
+  <div class="footer-actions"><button class="btn" id="cancelCase">Cancel</button><button class="btn primary" id="saveCase">Save case</button></div>
+ </div>
+</div>
+
+<script>
+const CURRICULUM = {"Foundations & advanced knowledge": ["Physiological differences: neonate, child and adolescent", "Inheritance, newborn screening and genetic counselling", "Early attachment theory", "Causes of developmental delay: CNS anomalies", "Causes of developmental delay: extreme low birth weight / prematurity", "Causes of developmental delay: chromosomal disorders / Fragile X", "Causes of developmental delay: congenital infection", "Causes of developmental delay: cerebral palsy", "Causes of developmental delay: sensory disorders", "Causes of developmental delay: inborn errors of metabolism", "Causes of developmental delay: neuromuscular disorders", "Causes of developmental delay: FASD / maternal drug exposure", "Five domains of developmental disability", "Autism spectrum disorder", "Specific learning disorder / learning disability", "WISC principles and interpretation", "Nutrition across age groups", "Child consent / mature minor principles", "Adolescent confidentiality, consent and chaperones", "Adolescent psychosocial assessment and risk", "Adolescent self-harm and suicide risk", "Adolescent substance use / harm minimisation", "Adolescent eating disorders / body image", "Child protection and mandatory reporting", "Sexual health / STI screening in adolescents", "Paediatric palliative care", "Vaccination schedule, adverse events and hesitancy", "Growth faltering / failure to thrive", "Obesity", "Iron deficiency", "Vitamin D deficiency", "Paediatric diagnostic testing and age-specific interpretation", "Paediatric prescribing and dose safety", "Paediatric resuscitation formulae", "Pain relief and distress minimisation", "Rural / remote paediatrics: distance, delay and limited resources", "Telehealth, PACS and remote clinical support"], "Upper airway, ENT, eye & oral": ["Recurrent viral URTI", "Croup", "Stridor", "Laryngomalacia", "Rhinitis", "Sinusitis", "Nasal septal haematoma", "Epistaxis", "Sleep apnoea", "Hearing loss", "Otitis media", "Chronic suppurative otitis media", "Otitis externa", "Cholesteatoma", "Stomatitis", "Oral thrush", "Herpes / coxsackie oral disease", "Teething", "Dental caries prevention", "Tonsillitis / sore throat", "Epiglottitis", "Cervical lymphadenopathy", "Congenital glaucoma", "Cataract", "Blocked tear duct", "Conjunctivitis", "Unilateral red eye", "Retinoblastoma", "Amblyopia / squint", "Periorbital cellulitis"], "Respiratory": ["Recurrent bronchitis / chronic cough", "Bronchiolitis", "Asthma", "Wheeze under 3 years", "Psychogenic cough", "Pneumonia", "Atypical pneumonia", "Pertussis", "Cystic fibrosis", "Tuberculosis", "Bronchiectasis / chronic suppurative lung disease", "Protracted bacterial bronchitis (PBB)"], "Cardiology": ["Innocent vs pathological murmur", "Coarctation of the aorta", "Supraventricular tachycardia", "Abnormal blood pressure / paediatric hypertension", "Infective endocarditis prevention", "Myocarditis / pericarditis differential", "Acute rheumatic fever / rheumatic heart disease"], "Gastrointestinal": ["Abdominal pain / acute abdomen", "Vomiting", "Acute diarrhoea", "Chronic diarrhoea", "Dehydration and rehydration", "Gastro-oesophageal reflux", "Pyloric stenosis", "Coeliac disease", "Appendicitis", "Hernia", "Abdominal mass", "Intussusception", "Constipation", "Encopresis", "Rectal bleeding", "Jaundice / hepatitis", "Food protein-induced enterocolitis / food allergy differential"], "Renal & genitourinary": ["Abnormal / ambiguous genitalia", "Fluid and electrolyte disturbance", "Hydrocoele", "Undescended testis", "Inguinal hernia", "Urinary tract infection", "Vesicoureteric reflux", "Congenital urinary tract abnormalities", "Acute urinary obstruction", "Glomerulonephritis / PSGN", "Nephrotic syndrome", "Enuresis / bed wetting", "Vulvitis", "Labial adhesions", "Phimosis", "Paraphimosis", "Testicular torsion / acute scrotum", "Circumcision issues", "GU tumours"], "Dermatology": ["Normal skin variation / birthmarks", "Viral exanthems", "Napkin rash", "Tinea / kerion", "Eczema", "Psoriasis", "Seborrhoeic dermatitis", "Scabies", "Lice", "Molluscum contagiosum", "Pityriasis", "Perianal streptococcal infection", "Impetigo", "Cellulitis / skin infection", "Urticaria / angioedema", "Drug / food rashes", "Meningococcal rash / septicaemia"], "Musculoskeletal": ["Limp / antalgic gait", "Septic arthritis", "Osteomyelitis / bone infection", "Perthes disease", "Developmental dysplasia of hip", "Lower limb problems", "Patellofemoral syndromes", "Epiphysitis / apophysitis", "Soft tissue trauma", "Minor dislocations", "Progressive muscular weakness", "Joint pain differential / inflammatory arthritis"], "Infectious diseases & public health": ["Measles", "Mumps", "Rubella", "EBV", "HSV", "Haemophilus influenzae B", "Meningococcal disease", "Varicella", "Streptococcal infection / GAS", "Staphylococcal infection", "HIV", "Hepatitis", "Congenital infections", "Influenza", "Tetanus-prone wounds", "Invasive GAS contacts", "Public health notification / contact tracing / outbreak control"], "Haematology, immunology & rheumatology": ["Normal age-specific haematology", "Anaemia", "Leukaemia", "Lymphoma", "Purpura", "Haemophilia / bleeding disorders", "Thalassaemia", "Sickle cell disease", "Allergy", "Vasculitis", "Kawasaki disease", "Autoimmune disease", "SLE", "Juvenile inflammatory arthritis", "Immunodeficiency"], "Endocrine & metabolic": ["Diabetes mellitus: new presentation", "Diabetic ketoacidosis", "Hypoglycaemia", "Thyroid disorders", "Short stature", "Abnormal puberty", "Type 2 diabetes / insulin resistance"], "Neurology": ["Febrile seizure", "Epilepsy / seizure disorder", "Altered conscious state", "Head injury", "Neuromuscular weakness", "Sydenham chorea", "Headache differential"], "Neonatal": ["Neonatal resuscitation", "Respiratory distress in newborn", "Birth asphyxia", "Cyanosis", "Neonatal hypoglycaemia", "Hypothermia", "Neonatal vomiting", "Failure to pass meconium", "Physiological jaundice", "Pathological jaundice", "Neonatal sepsis / fever", "Neonatal seizures", "Maternal infections affecting neonate", "Feeding the newborn", "Infant of diabetic mother", "Vitamin K / Hep B / BCG counselling", "Routine newborn check", "Prematurity and neuroprotection", "Neonatal transfer / retrieval"], "Developmental, behavioural & psychosocial": ["Developmental assessment", "Speech and language delay", "Global developmental delay", "ADHD", "Autism", "Behavioural problems", "Sleep difficulties", "Crying baby", "Oppositional behaviour", "Intellectual disability", "Physical disability", "Language disability", "School performance / learning difficulties", "Bullying", "Anxiety / school refusal", "Depression", "Self-harm", "Early psychosis", "Parenting issues", "Grief", "Family dysfunction / social context", "Child abuse / neglect", "SIDS prevention"], "Aboriginal & Torres Strait Islander child health": ["Cultural safety and family / community context", "Overcrowding and housing-related health impacts", "Chronic diarrhoeal disease", "Malnutrition", "Failure to thrive", "UTI / renal stones", "CSOM and hearing loss", "Chronic suppurative lung disease / bronchiectasis", "Trachoma", "Iron deficiency", "Scabies / parasitic disease", "Impetigo", "Acute rheumatic fever / RHD", "Post-streptococcal glomerulonephritis", "Population health / prevention / access barriers"], "Procedures, emergencies & inpatient care": ["ABCDE / recognition of the critically unwell child", "Hypovolaemia / shock", "Hypoxia", "Acidosis", "Blood transfusion", "Maintenance fluid calculation", "Lumbar puncture", "Intraosseous access", "IV access", "Airway management / intubation principles", "Procedural sedation / analgesia", "Foreign body / basic emergency procedures", "Poisoning and overdose", "Snake / spider / local envenomation", "Drowning", "Retrieval preparation and stabilisation", "Telehealth support to a remote colleague"]};
+const PAST = [{"year": "2024", "topics": "Fever in neonate", "domain": "Neonatal / emergency"}, {"year": "2024", "topics": "Respiratory illness + vaccination", "domain": "Respiratory / prevention"}, {"year": "2024", "topics": "Antalgic gait", "domain": "Musculoskeletal"}, {"year": "2024", "topics": "Depression", "domain": "Mental health"}, {"year": "2024", "topics": "Constipation", "domain": "Gastrointestinal"}, {"year": "2024", "topics": "Faltering growth + eye infection", "domain": "Growth / eye"}, {"year": "2024", "topics": "Seizure disorder", "domain": "Neurology"}, {"year": "2024", "topics": "Bronchiolitis", "domain": "Respiratory"}, {"year": "2025", "topics": "PBB + eczema + asthma", "domain": "Respiratory / dermatology"}, {"year": "2025", "topics": "Limp + septic joint + needle stick", "domain": "MSK / infectious / procedure"}, {"year": "2025", "topics": "CVA / CT support", "domain": "Neurology / telehealth support"}, {"year": "2025", "topics": "Neonatal case", "domain": "Neonatal"}, {"year": "2025", "topics": "Bed wetting", "domain": "Renal / psychosocial"}, {"year": "2025", "topics": "Self-harm", "domain": "Adolescent mental health"}, {"year": "2025", "topics": "Speech delay", "domain": "Development"}, {"year": "2025", "topics": "Suspected autism", "domain": "Development"}];
+const CONTEXT = [["Senior role", "State that you are the senior paediatric doctor and lead the local team."], ["Local capability", "Use the 4 paediatric beds, 24/7 ED, general ward and theatre appropriately."], ["No onsite specialist", "You are not waiting for an onsite paediatrician; use telehealth / phone support while continuing definitive care."], ["Retrieval threshold", "Decide early whether the child can be managed locally. Escalate early when time-critical transfer is plausible."], ["Distance", "Nearest base hospital is 600 km away and major hospital 700 km away; transfer has real delay."], ["Aeromedical constraints", "Fixed-wing retrieval is subject to availability. Stabilise for a prolonged local interval."], ["Diagnostics", "Use onsite CT/ultrasound and pathology/blood bank, including after-hours on-call services when justified."], ["Pharmacy", "Pharmacy is office hours with 24/7 on-call support; think about medication availability."], ["Allied health", "Use OT, speech, physio, dietetics, social work, child health, mental health, child protection and Indigenous health services."], ["Visiting / outreach care", "Use visiting paediatrician and outreach for planned follow-up when safe."], ["Remote towns", "Remote centres are nurse-directed with no inpatient beds and telehealth links; tailor advice to the colleague's capability."], ["Access / weather", "Minor roads are unsealed and access can be weather-dependent. Build this into discharge, review and transfer plans."], ["Cultural safety", "35% of the district identifies as Aboriginal and Torres Strait Islander; explicitly use culturally safe care and Indigenous health support where relevant."], ["Population health", "When relevant, add prevention, notification, contact tracing, immunisation, housing / access issues and community-level actions."], ["Continuity", "Give a concrete follow-up plan, who will review, when, what tests are repeated, and red flags / re-entry plan."], ["Leadership", "Delegate clearly, use closed-loop communication and support junior / nursing / remote colleagues."]];
+const RESOURCES = [["ACRRM Paediatrics AST Handbook", "Curriculum source", "Use to define what is examinable and the expected advanced rural-generalist scope."], ["Current StAMPS Community Profile", "Exam context", "Memorise the available services, distances, retrieval model and remote-town capabilities."], ["ACRRM public StAMPS reports", "Exam intelligence", "Use past topics and examiner guidance to prioritise practice and calibrate answer style."], ["RCH Clinical Practice Guidelines", "Clinical management", "First-line practical paediatric algorithms and acute management."], ["Therapeutic Guidelines", "Treatment detail", "Antibiotic choice, treatment regimens and guideline-level management."], ["AMH / AMH Children's Dosing Companion", "Medication detail", "Dose, contraindication, interactions, age / weight-specific prescribing checks."], ["Osmosis", "Concept learning", "Use for mechanisms and concepts that are not sticking; do not use as the final prescribing authority."], ["100 Cases in Paediatrics", "Case application", "Use the 100 presentations as case prompts. Convert them into 3-part StAMPS-style questions; verify management against current Australian guidelines."], ["Past-question documents", "Pattern recognition", "Work every case aloud, record weak domains, then repeat later under time pressure."], ["Akram / ACRRM practice cases", "Exam rehearsal", "Score them against the current 5-domain rubric and StAMPSville checklist."], ["Anki", "Retrieval practice", "Use for facts, doses, red flags, diagnostic criteria and steps that must be instantly recallable."]];
+const PLAN = [["16\u201320 Sep", "Map + diagnose", "Build the curriculum map; complete baseline timed cases across neonatal, acute, developmental, adolescent and Aboriginal child health. Convert weaknesses into Anki."], ["21\u201325 Sep", "Close major content gaps", "One major curriculum system per study session + 2 spoken cases/day where possible. Start repeating weak cases after 48\u201372 h."], ["26\u201330 Sep", "Case-heavy integration", "Shift to mixed, unseen, three-part cases. Every answer must include senior role, StAMPSville resources, escalation/retrieval, follow-up and communication."], ["1\u20135 Oct", "Exam simulation", "Run 8-case blocks or split 4+4 blocks. Score all five official domains. Review only errors and recurring weak patterns."], ["6\u20138 Oct", "Targeted repair", "No broad rereading. Drill lowest rubric domains, weak curriculum areas, common doses / emergencies and StAMPSville logistics."], ["9 Oct", "Taper", "Short Anki, one or two confidence cases, community profile recall, tech / exam setup. Finish early."], ["10 Oct", "Exam day", "Use the 5-minute reading time to define the problem, identify context constraints and predict the three question domains. Answer as the senior doctor."]];
+const CASE_BANK = [{"id": "eating-disorder", "title": "Eating disorder", "source": "ACRRM example", "domain": "Adolescent / mental health"}, {"id": "bronchiolitis", "title": "Bronchiolitis", "source": "ACRRM example + 2024 public report", "domain": "Respiratory"}, {"id": "poor-feeding-vaccine", "title": "Poor feeding + vaccine hesitancy", "source": "ACRRM example", "domain": "Infant / communication / prevention"}, {"id": "whooping-cough", "title": "Whooping cough / pertussis", "source": "ACRRM example + uploaded practice list", "domain": "Infectious disease / public health"}, {"id": "psgn", "title": "Post-streptococcal glomerulonephritis", "source": "ACRRM example", "domain": "Renal / First Nations child health"}, {"id": "fever-neonate", "title": "Fever in a neonate", "source": "2024 public report", "domain": "Neonatal / emergency"}, {"id": "resp-vaccination", "title": "Respiratory illness + vaccination", "source": "2024 public report", "domain": "Respiratory / prevention"}, {"id": "antalgic-gait", "title": "Antalgic gait", "source": "2024 public report", "domain": "Musculoskeletal"}, {"id": "depression", "title": "Depression", "source": "2024 public report", "domain": "Mental health"}, {"id": "constipation", "title": "Constipation", "source": "2024 public report", "domain": "Gastrointestinal"}, {"id": "faltering-eye", "title": "Faltering growth + eye infection", "source": "2024 public report", "domain": "Growth / ophthalmology"}, {"id": "seizure-disorder", "title": "Seizure disorder", "source": "2024 public report", "domain": "Neurology"}, {"id": "pbb-eczema-asthma", "title": "PBB + eczema + asthma", "source": "2025 public report", "domain": "Respiratory / dermatology"}, {"id": "limp-septic-needle", "title": "Limp + septic joint + needle stick", "source": "2025 public report", "domain": "Musculoskeletal / infectious / procedural"}, {"id": "cva-ct-support", "title": "CVA + CT support", "source": "2025 public report", "domain": "Neurology / remote clinical support"}, {"id": "neo-burn", "title": "Neo / burn case (listed as “Neo Burn”)", "source": "2025 public report", "domain": "Neonatal / emergency"}, {"id": "bed-wetting", "title": "Bed wetting / enuresis", "source": "2025 public report", "domain": "Renal / psychosocial"}, {"id": "self-harm", "title": "Self-harm", "source": "2025 public report", "domain": "Adolescent mental health"}, {"id": "speech-delay", "title": "Speech delay", "source": "2025 public report", "domain": "Development"}, {"id": "suspected-autism", "title": "Suspected autism", "source": "2025 public report", "domain": "Development"}, {"id": "neoresus", "title": "Neonatal resuscitation", "source": "Uploaded practice / past-case list", "domain": "Neonatal / emergency"}, {"id": "adolescent-substance", "title": "Adolescent substance misuse", "source": "Uploaded practice / past-case list", "domain": "Adolescent health"}, {"id": "testicular-torsion", "title": "Testicular torsion", "source": "Uploaded practice / past-case list", "domain": "Genitourinary / emergency"}, {"id": "ddh-gdd", "title": "Developmental dysplasia of the hip + global developmental delay", "source": "Uploaded practice / past-case list", "domain": "Development / musculoskeletal"}, {"id": "ftt-iron", "title": "Failure to thrive + iron deficiency in an infant", "source": "Uploaded practice / past-case list", "domain": "Growth / nutrition"}, {"id": "menorrhagia-iron", "title": "Menorrhagia + iron deficiency in an adolescent", "source": "Uploaded practice / past-case list", "domain": "Adolescent / haematology"}, {"id": "recurrent-om", "title": "Recurrent otitis media", "source": "Uploaded practice / past-case list", "domain": "ENT"}, {"id": "overdose", "title": "Paediatric overdose", "source": "Uploaded practice / past-case list", "domain": "Toxicology / emergency"}, {"id": "gaming-school-refusal", "title": "Gaming addiction + school refusal", "source": "Uploaded practice / past-case list", "domain": "Developmental / psychosocial"}, {"id": "leukaemia", "title": "Paediatric leukaemia", "source": "Uploaded practice / past-case list", "domain": "Haematology / oncology"}, {"id": "measles-polyarthritis", "title": "Measles + paediatric polyarthritis", "source": "Uploaded practice / past-case list", "domain": "Infectious / rheumatology / public health"}, {"id": "book-001", "title": "Case 1: Infant with persistent stridor / noisy breathing", "source": "100 Cases in Paediatrics", "domain": "Respiratory", "bookNo": 1, "bookCategory": "Respiratory", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-002", "title": "Case 2: Child with acute stridor / noisy breathing", "source": "100 Cases in Paediatrics", "domain": "Respiratory", "bookNo": 2, "bookCategory": "Respiratory", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-003", "title": "Case 3: Chesty infant", "source": "100 Cases in Paediatrics", "domain": "Respiratory", "bookNo": 3, "bookCategory": "Respiratory", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-004", "title": "Case 4: Chronic cough", "source": "100 Cases in Paediatrics", "domain": "Respiratory", "bookNo": 4, "bookCategory": "Respiratory", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-005", "title": "Case 5: Recurrent chest infections", "source": "100 Cases in Paediatrics", "domain": "Respiratory", "bookNo": 5, "bookCategory": "Respiratory", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-006", "title": "Case 6: Wheezy teenager", "source": "100 Cases in Paediatrics", "domain": "Respiratory", "bookNo": 6, "bookCategory": "Respiratory", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-007", "title": "Case 7: Wheezy young child", "source": "100 Cases in Paediatrics", "domain": "Respiratory", "bookNo": 7, "bookCategory": "Respiratory", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-008", "title": "Case 8: Fever with breathlessness", "source": "100 Cases in Paediatrics", "domain": "Respiratory", "bookNo": 8, "bookCategory": "Respiratory", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-009", "title": "Case 9: Teenager with chest pain", "source": "100 Cases in Paediatrics", "domain": "Respiratory", "bookNo": 9, "bookCategory": "Respiratory", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-010", "title": "Case 10: Cyanosed newborn", "source": "100 Cases in Paediatrics", "domain": "Cardiology", "bookNo": 10, "bookCategory": "Cardiology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-011", "title": "Case 11: Shocked neonate", "source": "100 Cases in Paediatrics", "domain": "Cardiology", "bookNo": 11, "bookCategory": "Cardiology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-012", "title": "Case 12: Pale breathless baby", "source": "100 Cases in Paediatrics", "domain": "Cardiology", "bookNo": 12, "bookCategory": "Cardiology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-013", "title": "Case 13: Incidental heart murmur", "source": "100 Cases in Paediatrics", "domain": "Cardiology", "bookNo": 13, "bookCategory": "Cardiology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-014", "title": "Case 14: Transient loss of consciousness / funny turn", "source": "100 Cases in Paediatrics", "domain": "Cardiology", "bookNo": 14, "bookCategory": "Cardiology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-015", "title": "Case 15: Thirst, polyuria and weight loss", "source": "100 Cases in Paediatrics", "domain": "Endocrinology & diabetes", "bookNo": 15, "bookCategory": "Endocrinology & diabetes", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-016", "title": "Case 16: Tall child", "source": "100 Cases in Paediatrics", "domain": "Endocrinology & diabetes", "bookNo": 16, "bookCategory": "Endocrinology & diabetes", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-017", "title": "Case 17: Short child", "source": "100 Cases in Paediatrics", "domain": "Endocrinology & diabetes", "bookNo": 17, "bookCategory": "Endocrinology & diabetes", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-018", "title": "Case 18: Child with obesity", "source": "100 Cases in Paediatrics", "domain": "Endocrinology & diabetes", "bookNo": 18, "bookCategory": "Endocrinology & diabetes", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-019", "title": "Case 19: Early puberty", "source": "100 Cases in Paediatrics", "domain": "Endocrinology & diabetes", "bookNo": 19, "bookCategory": "Endocrinology & diabetes", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-020", "title": "Case 20: Delayed puberty", "source": "100 Cases in Paediatrics", "domain": "Endocrinology & diabetes", "bookNo": 20, "bookCategory": "Endocrinology & diabetes", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-021", "title": "Case 21: Ambiguous genitalia / disorder of sex development", "source": "100 Cases in Paediatrics", "domain": "Endocrinology & diabetes", "bookNo": 21, "bookCategory": "Endocrinology & diabetes", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-022", "title": "Case 22: Adolescent gynaecomastia", "source": "100 Cases in Paediatrics", "domain": "Endocrinology & diabetes", "bookNo": 22, "bookCategory": "Endocrinology & diabetes", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-023", "title": "Case 23: Bow legs and poor growth", "source": "100 Cases in Paediatrics", "domain": "Endocrinology & diabetes", "bookNo": 23, "bookCategory": "Endocrinology & diabetes", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-024", "title": "Case 24: Neck swelling / thyroid presentation", "source": "100 Cases in Paediatrics", "domain": "Endocrinology & diabetes", "bookNo": 24, "bookCategory": "Endocrinology & diabetes", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-025", "title": "Case 25: Vomiting infant", "source": "100 Cases in Paediatrics", "domain": "Gastroenterology", "bookNo": 25, "bookCategory": "Gastroenterology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-026", "title": "Case 26: Bloody diarrhoea", "source": "100 Cases in Paediatrics", "domain": "Gastroenterology", "bookNo": 26, "bookCategory": "Gastroenterology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-027", "title": "Case 27: Teenager with chronic diarrhoea", "source": "100 Cases in Paediatrics", "domain": "Gastroenterology", "bookNo": 27, "bookCategory": "Gastroenterology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-028", "title": "Case 28: Acute gastroenteritis", "source": "100 Cases in Paediatrics", "domain": "Gastroenterology", "bookNo": 28, "bookCategory": "Gastroenterology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-029", "title": "Case 29: Acute abdominal pain", "source": "100 Cases in Paediatrics", "domain": "Gastroenterology", "bookNo": 29, "bookCategory": "Gastroenterology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-030", "title": "Case 30: Recurrent abdominal pain", "source": "100 Cases in Paediatrics", "domain": "Gastroenterology", "bookNo": 30, "bookCategory": "Gastroenterology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-031", "title": "Case 31: Constipated toddler", "source": "100 Cases in Paediatrics", "domain": "Gastroenterology", "bookNo": 31, "bookCategory": "Gastroenterology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-032", "title": "Case 32: Infant with poor weight gain", "source": "100 Cases in Paediatrics", "domain": "Gastroenterology", "bookNo": 32, "bookCategory": "Gastroenterology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-033", "title": "Case 33: Abdominal pain with jaundice", "source": "100 Cases in Paediatrics", "domain": "Gastroenterology", "bookNo": 33, "bookCategory": "Gastroenterology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-034", "title": "Case 34: Groin lump / hernia", "source": "100 Cases in Paediatrics", "domain": "Gastroenterology", "bookNo": 34, "bookCategory": "Gastroenterology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-035", "title": "Case 35: Abdominal pain with dysuria", "source": "100 Cases in Paediatrics", "domain": "Nephrology", "bookNo": 35, "bookCategory": "Nephrology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-036", "title": "Case 36: Haematuria / red urine", "source": "100 Cases in Paediatrics", "domain": "Nephrology", "bookNo": 36, "bookCategory": "Nephrology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-037", "title": "Case 37: Puffy face / oedema", "source": "100 Cases in Paediatrics", "domain": "Nephrology", "bookNo": 37, "bookCategory": "Nephrology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-038", "title": "Case 38: Enuresis / bed wetting", "source": "100 Cases in Paediatrics", "domain": "Nephrology", "bookNo": 38, "bookCategory": "Nephrology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-039", "title": "Case 39: Paediatric hypertension", "source": "100 Cases in Paediatrics", "domain": "Nephrology", "bookNo": 39, "bookCategory": "Nephrology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-040", "title": "Case 40: Fever after overseas travel", "source": "100 Cases in Paediatrics", "domain": "Infectious diseases", "bookNo": 40, "bookCategory": "Infectious diseases", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-041", "title": "Case 41: Persistent fever", "source": "100 Cases in Paediatrics", "domain": "Infectious diseases", "bookNo": 41, "bookCategory": "Infectious diseases", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-042", "title": "Case 42: Recurrent infections", "source": "100 Cases in Paediatrics", "domain": "Infectious diseases", "bookNo": 42, "bookCategory": "Infectious diseases", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-043", "title": "Case 43: Unexplained weight loss", "source": "100 Cases in Paediatrics", "domain": "Infectious diseases", "bookNo": 43, "bookCategory": "Infectious diseases", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-044", "title": "Case 44: Severely unwell child with temperature instability", "source": "100 Cases in Paediatrics", "domain": "Infectious diseases", "bookNo": 44, "bookCategory": "Infectious diseases", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-045", "title": "Case 45: Itchy rash", "source": "100 Cases in Paediatrics", "domain": "Dermatology", "bookNo": 45, "bookCategory": "Dermatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-046", "title": "Case 46: Deteriorating eczema", "source": "100 Cases in Paediatrics", "domain": "Dermatology", "bookNo": 46, "bookCategory": "Dermatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-047", "title": "Case 47: Infant with blistering skin lesions", "source": "100 Cases in Paediatrics", "domain": "Dermatology", "bookNo": 47, "bookCategory": "Dermatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-048", "title": "Case 48: Purpuric rash", "source": "100 Cases in Paediatrics", "domain": "Dermatology", "bookNo": 48, "bookCategory": "Dermatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-049", "title": "Case 49: Pale child / anaemia presentation", "source": "100 Cases in Paediatrics", "domain": "Haematology", "bookNo": 49, "bookCategory": "Haematology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-050", "title": "Case 50: Easy bruising", "source": "100 Cases in Paediatrics", "domain": "Haematology", "bookNo": 50, "bookCategory": "Haematology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-051", "title": "Case 51: Child with chest pain in a haematology context", "source": "100 Cases in Paediatrics", "domain": "Haematology", "bookNo": 51, "bookCategory": "Haematology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-052", "title": "Case 52: Abdominal mass", "source": "100 Cases in Paediatrics", "domain": "Oncology", "bookNo": 52, "bookCategory": "Oncology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-053", "title": "Case 53: Unsteady child", "source": "100 Cases in Paediatrics", "domain": "Oncology", "bookNo": 53, "bookCategory": "Oncology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-054", "title": "Case 54: Lymphadenopathy", "source": "100 Cases in Paediatrics", "domain": "Oncology", "bookNo": 54, "bookCategory": "Oncology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-055", "title": "Case 55: Swollen shoulder / bone mass", "source": "100 Cases in Paediatrics", "domain": "Oncology", "bookNo": 55, "bookCategory": "Oncology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-056", "title": "Case 56: Fever during chemotherapy", "source": "100 Cases in Paediatrics", "domain": "Oncology", "bookNo": 56, "bookCategory": "Oncology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-057", "title": "Case 57: Aches and pains / possible malignancy", "source": "100 Cases in Paediatrics", "domain": "Oncology", "bookNo": 57, "bookCategory": "Oncology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-058", "title": "Case 58: Girl with a limp", "source": "100 Cases in Paediatrics", "domain": "Bones & joints", "bookNo": 58, "bookCategory": "Bones & joints", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-059", "title": "Case 59: Bone or joint pain with fever", "source": "100 Cases in Paediatrics", "domain": "Bones & joints", "bookNo": 59, "bookCategory": "Bones & joints", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-060", "title": "Case 60: Swollen joints", "source": "100 Cases in Paediatrics", "domain": "Bones & joints", "bookNo": 60, "bookCategory": "Bones & joints", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-061", "title": "Case 61: Spinal deformity", "source": "100 Cases in Paediatrics", "domain": "Bones & joints", "bookNo": 61, "bookCategory": "Bones & joints", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-062", "title": "Case 62: Child with a seizure", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 62, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-063", "title": "Case 63: Febrile drowsy child", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 63, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-064", "title": "Case 64: Child in coma", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 64, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-065", "title": "Case 65: Late walking", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 65, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-066", "title": "Case 66: Learning difficulties", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 66, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-067", "title": "Case 67: Chronic headaches", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 67, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-068", "title": "Case 68: Facial weakness / asymmetrical smile", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 68, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-069", "title": "Case 69: Weak legs", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 69, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-070", "title": "Case 70: Developmental regression after previously normal progress", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 70, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": "Developmental regression case described by user"}, {"id": "book-071", "title": "Case 71: Hearing loss / deaf child", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 71, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-072", "title": "Case 72: Child with squint", "source": "100 Cases in Paediatrics", "domain": "Neurology & development", "bookNo": 72, "bookCategory": "Neurology & development", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-073", "title": "Case 73: Social communication difficulties / child with no friends", "source": "100 Cases in Paediatrics", "domain": "Child & adolescent psychiatry", "bookNo": 73, "bookCategory": "Child & adolescent psychiatry", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-074", "title": "Case 74: Hyperactive child", "source": "100 Cases in Paediatrics", "domain": "Child & adolescent psychiatry", "bookNo": 74, "bookCategory": "Child & adolescent psychiatry", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-075", "title": "Case 75: Teenager restricting food intake", "source": "100 Cases in Paediatrics", "domain": "Child & adolescent psychiatry", "bookNo": 75, "bookCategory": "Child & adolescent psychiatry", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-076", "title": "Case 76: Premature infant", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 76, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-077", "title": "Case 77: Breathless newborn", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 77, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-078", "title": "Case 78: Recurrent neonatal apnoeas", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 78, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-079", "title": "Case 79: Sudden deterioration in ventilated preterm infant", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 79, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-080", "title": "Case 80: Bilious vomiting in a neonate", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 80, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-081", "title": "Case 81: Neonatal jaundice", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 81, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-082", "title": "Case 82: Floppy infant", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 82, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-083", "title": "Case 83: Difficult delivery / neonatal resuscitation", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 83, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-084", "title": "Case 84: Newborn with multiple congenital abnormalities", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 84, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-085", "title": "Case 85: Sudden deterioration in a term newborn", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 85, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-086", "title": "Case 86: Possible trisomy 21", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 86, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-087", "title": "Case 87: Abnormal movements / seizures in an 8-day-old", "source": "100 Cases in Paediatrics", "domain": "Neonatology", "bookNo": 87, "bookCategory": "Neonatology", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-088", "title": "Case 88: Wheeze with sneezing / allergic presentation", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 88, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-089", "title": "Case 89: Fracture in an infant / safeguarding concern", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 89, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-090", "title": "Case 90: Vaginal discharge in a child", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 90, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-091", "title": "Case 91: Abnormal head shape", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 91, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-092", "title": "Case 92: Drowsy toddler", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 92, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-093", "title": "Case 93: Confused teenager", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 93, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-094", "title": "Case 94: Intoxicated adolescent", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 94, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-095", "title": "Case 95: Unusual appetite", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 95, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-096", "title": "Case 96: Sudden collapse", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 96, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-097", "title": "Case 97: Pregnancy in a 14-year-old", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 97, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-098", "title": "Case 98: Sudden unexpected child death", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 98, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-099", "title": "Case 99: Tired teenager", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 99, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}, {"id": "book-100", "title": "Case 100: Poor weight gain", "source": "100 Cases in Paediatrics", "domain": "Miscellaneous", "bookNo": 100, "bookCategory": "Miscellaneous", "sourceUrl": "https://www.slideshare.net/slideshow/100casesinpaediatricspdf/252216634", "note": ""}];
+const EXAM = new Date("2026-10-10T09:00:00+10:00");
+
+const STATUS = ["Not started","Learning","Can manage","Exam ready"];
+const PRIORITY = ["High","Medium","Low"];
+const RUBRIC_NAMES = ["Management P1","Management P2","Management P3","Problem definition","Communication"];
+const key = "paedsASTDashboardV1";
+
+function defaultState(){
+  const topicState={};
+  Object.entries(CURRICULUM).forEach(([group,topics])=>topics.forEach(t=>topicState[t]={status:"Not started",priority:autoPriority(t)}));
+  PAST.forEach(p=>{ if(topicState[p.topics]) topicState[p.topics].priority="High"; });
+  const caseBank={}; CASE_BANK.forEach(c=>caseBank[c.id]={done:false,feedback:false,mastery:"Not started",attempts:[]}); return {topicState, cases:[], anki:[], pastStatus:{}, todayDone:{}, caseBank};
+}
+function autoPriority(t){
+ const s=t.toLowerCase();
+ const high=["neon","sepsis","fever","resusc","shock","asthma","bronchiol","seiz","autism","development","self-harm","child protection","rheumatic","glom","retrieval","diabetic keto","meningoc","septic","limp","speech","aboriginal","cultural","vaccin"];
+ return high.some(x=>s.includes(x)) ? "High" : "Medium";
+}
+let state;
+try { state=JSON.parse(localStorage.getItem(key)) || defaultState(); } catch(e){state=defaultState();}
+if(!state.caseBank) state.caseBank={};
+CASE_BANK.forEach(c=>{
+  if(!state.caseBank[c.id]) state.caseBank[c.id]={done:false,feedback:false,mastery:"Not started",attempts:[]};
+  if(!Array.isArray(state.caseBank[c.id].attempts)) state.caseBank[c.id].attempts=[];
+});
+
+function save(){ localStorage.setItem(key,JSON.stringify(state)); refreshAll(); }
+function dateISO(d=new Date()){return new Intl.DateTimeFormat("en-CA",{timeZone:"Australia/Melbourne",year:"numeric",month:"2-digit",day:"2-digit"}).format(d)}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
+
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active")); b.classList.add("active");
+ document.querySelectorAll(".section").forEach(x=>x.classList.remove("active")); document.getElementById(b.dataset.section).classList.add("active");
+ window.scrollTo(0,0);
+});
+
+function currentPhase(){
+ const now=new Date();
+ if(now < new Date("2026-09-21T00:00:00+10:00")) return "Map + diagnose";
+ if(now < new Date("2026-09-26T00:00:00+10:00")) return "Close major gaps";
+ if(now < new Date("2026-10-01T00:00:00+10:00")) return "Case-heavy integration";
+ if(now < new Date("2026-10-06T00:00:00+11:00")) return "Exam simulation";
+ if(now < new Date("2026-10-09T00:00:00+11:00")) return "Targeted repair";
+ if(now < EXAM) return "Taper";
+ return "Exam complete";
+}
+function todayTemplate(){
+ const phase=currentPhase();
+ const base=[
+  ["Anki","20–30 min retrieval; create cards only from actual gaps."],
+  ["One content target","Use RCH / TG / AMH for a weak curriculum area; stop when you can explain it aloud."],
+  ["Two spoken cases","10 min each, three questions, then score all five rubric domains."],
+  ["Context drill","5 min: senior role, local capability, retrieval, cultural safety, follow-up."]
+ ];
+ if(phase==="Exam simulation") base[1]=["Timed block","Do 4–8 mixed cases before opening references."];
+ if(phase==="Targeted repair") base[1]=["Repair weakest domain","Only work the lowest-scoring curriculum / rubric areas."];
+ if(phase==="Taper") return [["Short Anki","Review mature cards; no large new card load."],["Confidence cases","1–2 familiar cases with crisp structure."],["StAMPSville recall","Recite services, distances, retrieval and remote-town model."],["Finish early","Protect sleep and exam setup."]];
+ return base;
+}
+function refreshHome(){
+ const now=new Date();
+ const days=Math.max(0,Math.ceil((EXAM-now)/86400000));
+ document.getElementById("daysLeft").textContent=days;
+ document.getElementById("phasePill").textContent=currentPhase();
+ document.getElementById("todayDate").textContent=new Intl.DateTimeFormat("en-AU",{weekday:"short",day:"numeric",month:"short"}).format(now);
+ const total=Object.keys(state.topicState).length;
+ const ready=Object.values(state.topicState).filter(x=>x.status==="Exam ready").length;
+ const cov=total?Math.round(100*ready/total):0;
+ document.getElementById("coverageKpi").textContent=cov+"%"; document.getElementById("coverageBar").style.width=cov+"%";
+ const courseStart=new Date("2026-09-16T00:00:00+10:00"); const full=EXAM-courseStart; const elapsed=now-courseStart;
+ document.getElementById("timeBar").style.width=clamp(100*elapsed/full,0,100)+"%";
+ const timed=state.cases.filter(c=>c.timed==="yes");
+ document.getElementById("casesKpi").textContent=timed.length;
+ const scores=state.cases.map(c=>c.scores.reduce((a,b)=>a+b,0));
+ document.getElementById("caseAvg").textContent=scores.length ? "Average "+(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1)+"/35" : "No rubric average yet";
+ let ctxN=0,ctxD=0; state.cases.forEach(c=>{ctxN+=(c.context||[]).length;ctxD+=CONTEXT.length;});
+ document.getElementById("contextKpi").textContent=ctxD?Math.round(100*ctxN/ctxD)+"%":"0%";
+ renderToday(); renderGaps(); renderRecent();
+ const mini=document.getElementById("coreContextMini");
+ mini.innerHTML=CONTEXT.slice(0,6).map(([a])=>`<span class="badge" style="margin:3px">${esc(a)}</span>`).join("");
+}
+function renderToday(){
+ const day=dateISO(); if(!state.todayDone[day]) state.todayDone[day]={};
+ document.getElementById("todayTasks").innerHTML=todayTemplate().map(([t,d],i)=>`<div class="task ${state.todayDone[day][i]?"done":""}" data-i="${i}"><div class="checkbox">${state.todayDone[day][i]?"✓":""}</div><div class="task-text"><b>${esc(t)}</b><div class="note">${esc(d)}</div></div></div>`).join("");
+ document.querySelectorAll("#todayTasks .task").forEach(el=>el.onclick=()=>{const i=el.dataset.i;state.todayDone[day][i]=!state.todayDone[day][i];save();});
+}
+document.getElementById("resetToday").onclick=()=>{state.todayDone[dateISO()]={};save();};
+
+function renderGaps(){
+ const topics=Object.entries(state.topicState).map(([t,v])=>({t,...v}));
+ const high=topics.filter(x=>x.priority==="High" && x.status!=="Exam ready").sort((a,b)=>STATUS.indexOf(a.status)-STATUS.indexOf(b.status)).slice(0,6);
+ const domainStats=rubricStats();
+ let html="";
+ if(high.length) html += high.map(x=>`<div class="mini-stat"><span>${esc(x.t)}</span><b>${esc(x.status)}</b></div>`).join("");
+ if(state.cases.length && domainStats.length){
+   const w=domainStats.slice().sort((a,b)=>a.avg-b.avg)[0];
+   html += `<div class="callout" style="margin-top:12px"><b>Rubric gap:</b> ${esc(w.name)} averages ${w.avg.toFixed(1)}/7.</div>`;
+ }
+ document.getElementById("gaps").innerHTML=html||'<div class="empty">Start statusing the curriculum and logging cases. The dashboard will surface the gaps.</div>';
+}
+function renderRecent(){
+ const arr=state.cases.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
+ document.getElementById("recentCases").innerHTML=arr.length?arr.map(c=>`<div class="mini-stat"><span><b>${esc(c.title)}</b><br><small>${esc(c.date)} · ${esc(c.source)}</small></span><b>${c.scores.reduce((a,b)=>a+b,0)}/35</b></div>`).join(""):'<div class="empty">No cases logged yet.</div>';
+}
+
+let collapsed={};
+function renderCurriculum(){
+ const q=document.getElementById("topicSearch").value.toLowerCase();
+ const sf=document.getElementById("statusFilter").value, pf=document.getElementById("priorityFilter").value;
+ const container=document.getElementById("curriculumContainer");
+ let html="";
+ Object.entries(CURRICULUM).forEach(([group,topics])=>{
+  const filtered=topics.filter(t=>{
+    const x=state.topicState[t]||{status:"Not started",priority:autoPriority(t)};
+    return (!q||t.toLowerCase().includes(q)||group.toLowerCase().includes(q))&&(!sf||x.status===sf)&&(!pf||x.priority===pf);
+  });
+  if(!filtered.length)return;
+  const ready=topics.filter(t=>(state.topicState[t]||{}).status==="Exam ready").length;
+  html+=`<div class="topic-group"><div class="topic-head" data-group="${esc(group)}"><span>${esc(group)} <span class="badge">${ready}/${topics.length} ready</span></span><span>${collapsed[group]?"▸":"▾"}</span></div>`;
+  if(!collapsed[group]) html+=`<div class="topic-list">${filtered.map(t=>{
+    const x=state.topicState[t]||{status:"Not started",priority:autoPriority(t)};
+    return `<div class="topic-row"><div>${esc(t)}</div><select class="status-select" data-topic="${esc(t)}">${STATUS.map(s=>`<option ${x.status===s?"selected":""}>${s}</option>`).join("")}</select><select class="priority-select" data-topic="${esc(t)}">${PRIORITY.map(s=>`<option ${x.priority===s?"selected":""}>${s}</option>`).join("")}</select><button class="btn small quick-case" data-topic="${esc(t)}">Log case</button></div>`;
+  }).join("")}</div>`;
+  html+="</div>";
+ });
+ container.innerHTML=html||'<div class="empty">No topics match the filters.</div>';
+ container.querySelectorAll(".topic-head").forEach(h=>h.onclick=()=>{collapsed[h.dataset.group]=!collapsed[h.dataset.group];renderCurriculum();});
+ container.querySelectorAll(".status-select").forEach(s=>s.onchange=()=>{state.topicState[s.dataset.topic].status=s.value;save();});
+ container.querySelectorAll(".priority-select").forEach(s=>s.onchange=()=>{state.topicState[s.dataset.topic].priority=s.value;save();});
+ container.querySelectorAll(".quick-case").forEach(b=>b.onclick=()=>openCase(b.dataset.topic));
+ const vals=Object.values(state.topicState);
+ document.getElementById("topicTotal").textContent=vals.length;
+ document.getElementById("topicNot").textContent=vals.filter(x=>x.status==="Not started").length;
+ document.getElementById("topicManage").textContent=vals.filter(x=>x.status==="Can manage").length;
+ document.getElementById("topicReady").textContent=vals.filter(x=>x.status==="Exam ready").length;
+}
+["topicSearch","statusFilter","priorityFilter"].forEach(id=>document.getElementById(id).oninput=renderCurriculum);
+document.getElementById("collapseAll").onclick=()=>{Object.keys(CURRICULUM).forEach(k=>collapsed[k]=true);renderCurriculum();};
+document.getElementById("expandAll").onclick=()=>{collapsed={};renderCurriculum();};
+
+
+
+const WEAKNESS_TAGS=[
+ "Clinical knowledge","Problem definition","Structure / prioritisation","Investigations",
+ "Treatment / prescribing","StAMPSville context","Senior leadership","Escalation / retrieval",
+ "Communication","Cultural safety","Follow-up / continuity","Time management"
+];
+const OUTCOME_DAYS={"Major gaps":1,"Needs repeat":3,"Solid":7,"Exam ready":14};
+
+function addDaysISO(dateStr,days){
+ const d=new Date(dateStr+"T12:00:00");d.setDate(d.getDate()+days);return dateISO(d);
+}
+function caseSummary(id){
+ const s=state.caseBank[id]||{done:false,feedback:false,mastery:"Not started",attempts:[]};
+ const attempts=s.attempts||[];
+ const last=attempts.length?attempts.slice().sort((a,b)=>a.date.localeCompare(b.date))[attempts.length-1]:null;
+ const due=last?addDaysISO(last.date,OUTCOME_DAYS[last.outcome]??3):"";
+ let mastery=s.mastery||"Not started";
+ if(last){
+   if(last.outcome==="Exam ready") mastery="Exam ready";
+   else if(last.outcome==="Major gaps"||last.outcome==="Needs repeat") mastery="Needs repeat";
+   else if(last.outcome==="Solid") {
+     const solidCount=attempts.filter(a=>a.outcome==="Solid"||a.outcome==="Exam ready").length;
+     mastery=solidCount>=2?"Exam ready":"Needs repeat";
+   }
+ }
+ return {...s,attempts,last,due,mastery};
+}
+function isDue(id){
+ const s=caseSummary(id);return !!s.due && s.due<=dateISO() && s.mastery!=="Exam ready";
+}
+function outcomeClass(o){
+ return o==="Major gaps"?"outcome-major":o==="Needs repeat"?"outcome-repeat":o==="Solid"?"outcome-solid":"outcome-ready";
+}
+function renderCaseBank(){
+ const searchEl=document.getElementById("bankSearch");
+ if(!searchEl)return;
+ const q=(searchEl.value||"").toLowerCase();
+ const src=(document.getElementById("bankSource")?.value||"");
+ const dom=(document.getElementById("bankDomain")?.value||"");
+ const view=(document.getElementById("bankView")?.value||"");
+
+ const domSel=document.getElementById("bankDomain");
+ if(domSel && domSel.options.length===1){
+   [...new Set(CASE_BANK.map(c=>c.domain))].sort().forEach(d=>{
+     const o=document.createElement("option");o.textContent=d;o.value=d;domSel.appendChild(o);
+   });
+ }
+ const matches=CASE_BANK.filter(c=>{
+   const s=caseSummary(c.id);
+   const hay=(c.title+" "+c.source+" "+c.domain).toLowerCase();
+   const sourceOK=!src || c.source.includes(src);
+   const domainOK=!dom || c.domain===dom;
+   const viewOK=!view || (view==="notdone"&&s.attempts.length===0) || (view==="due"&&isDue(c.id)) ||
+       (view==="repeat"&&s.mastery==="Needs repeat") || (view==="ready"&&s.mastery==="Exam ready");
+   return (!q||hay.includes(q)) && sourceOK && domainOK && viewOK;
+ });
+ const el=document.getElementById("caseBankList");
+ el.innerHTML=matches.length?matches.map(c=>{
+   const s=caseSummary(c.id);
+   const last=s.last;
+   const dueText=s.due ? (isDue(c.id)?"DUE "+s.due:"Next "+s.due) : "—";
+   return `<div class="bank-row ${s.attempts.length?"bank-done":""}">
+     <div><input class="bigcheck bank-done-check" type="checkbox" data-id="${esc(c.id)}" ${s.attempts.length||s.done?"checked":""} title="Done aloud"></div>
+     <div>
+       <div class="bank-title">${esc(c.title)}</div>
+       <div class="meta">${esc(c.domain)}${c.bookNo?` · Book case ${c.bookNo}`:""}</div>
+       ${last&&last.notes?`<div class="note" style="margin-top:4px">${esc(last.notes)}</div>`:""}
+     </div>
+     <div class="bank-source"><span class="badge">${esc(c.source)}</span></div>
+     <div class="bank-extra"><b>${s.attempts.length}</b><div class="meta">attempts</div></div>
+     <div class="bank-extra"><span class="badge ${last?outcomeClass(last.outcome):""}">${last?esc(last.outcome):"Unseen"}</span></div>
+     <div class="bank-extra"><b>${esc(dueText)}</b><div class="meta">${s.mastery==="Exam ready"?"maintenance":"repeat"}</div></div>
+     <div class="row bank-practice">
+       <button class="btn small log-attempt" data-id="${esc(c.id)}">Log attempt</button>
+       <button class="btn small copy-practice" data-id="${esc(c.id)}">Practice prompt</button>
+     </div>
+   </div>`;
+ }).join(""):'<div class="empty">No cases match these filters.</div>';
+
+ el.querySelectorAll(".bank-done-check").forEach(x=>x.onchange=()=>{
+   state.caseBank[x.dataset.id].done=x.checked;save();
+ });
+ el.querySelectorAll(".log-attempt").forEach(b=>b.onclick=()=>openAttempt(b.dataset.id));
+ el.querySelectorAll(".copy-practice").forEach(b=>b.onclick=async()=>{
+   const c=CASE_BANK.find(x=>x.id===b.dataset.id);
+   const sourceInstruction=c.source==="100 Cases in Paediatrics"
+      ? `Use Case ${c.bookNo} from this source: ${c.sourceUrl}. Do not reveal the diagnosis or answer before I respond.`
+      : `Use the "${c.title}" case from my uploaded Paediatrics AST StAMPS material.`;
+   const prompt=`Please run a Paediatrics AST StAMPS practice station. ${sourceInstruction}
+Give me only the candidate information and first examiner question to start. I will answer aloud and may pause, so do not interrupt until I explicitly say I am done. Then proceed through the case in StAMPS style, one part at a time.
+At the end, give specific feedback against the current five domains: Management Part 1, Management Part 2, Management Part 3, Problem Definition & Systematic Approach, and Communication & Professionalism. Separately assess StAMPSville context, senior-doctor leadership, local resource use, escalation/retrieval, cultural safety and continuity/follow-up.
+Finish with exactly one dashboard outcome from: Major gaps / Needs repeat / Solid / Exam ready, and list only the applicable weakness tags from: ${WEAKNESS_TAGS.join(", ")}.`;
+   try{await navigator.clipboard.writeText(prompt); b.textContent="Copied"; setTimeout(()=>b.textContent="Practice prompt",1200);}
+   catch(e){promptFallback(prompt);}
+ });
+ const vals=CASE_BANK.map(c=>caseSummary(c.id));
+ document.getElementById("bankTotal").textContent=CASE_BANK.length;
+ document.getElementById("bankDone").textContent=vals.filter(x=>x.attempts.length||x.done).length;
+ document.getElementById("bankFeedback").textContent=vals.filter(x=>x.attempts.length).length;
+ document.getElementById("bankReady").textContent=vals.filter(x=>x.mastery==="Exam ready").length;
+ renderRepeatQueue();renderWeakPatterns();renderTopicCoverage();
+}
+function promptFallback(p){
+ const t=document.createElement("textarea");t.value=p;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();
+}
+["bankSearch","bankSource","bankDomain","bankView"].forEach(id=>{const e=document.getElementById(id);if(e)e.oninput=renderCaseBank;});
+
+function renderRepeatQueue(){
+ const el=document.getElementById("repeatQueue");if(!el)return;
+ const today=dateISO();
+ const rows=CASE_BANK.map(c=>({c,s:caseSummary(c.id)}))
+   .filter(x=>x.s.attempts.length && x.s.mastery!=="Exam ready")
+   .sort((a,b)=>(a.s.due||"9999").localeCompare(b.s.due||"9999")).slice(0,8);
+ el.innerHTML=rows.length?rows.map(({c,s})=>`<div class="queue-item">
+   <span><b>${esc(c.title)}</b><br><small>${esc(c.domain)}</small></span>
+   <span class="badge ${s.last?outcomeClass(s.last.outcome):""}">${s.last?esc(s.last.outcome):"—"}</span>
+   <b>${s.due<=today?"Due ":""}${esc(s.due)}</b>
+ </div>`).join(""):'<div class="empty">No repeat cases yet.</div>';
+}
+function renderWeakPatterns(){
+ const el=document.getElementById("weakPatterns");if(!el)return;
+ const counts={};WEAKNESS_TAGS.forEach(x=>counts[x]=0);
+ let total=0;
+ CASE_BANK.forEach(c=>(state.caseBank[c.id]?.attempts||[]).forEach(a=>{
+   (a.weak||[]).forEach(w=>{counts[w]=(counts[w]||0)+1;total++;});
+ }));
+ const rows=Object.entries(counts).filter(([,n])=>n>0).sort((a,b)=>b[1]-a[1]).slice(0,8);
+ const max=rows.length?rows[0][1]:1;
+ el.innerHTML=rows.length?rows.map(([w,n])=>`<div style="padding:6px 0"><div class="row" style="justify-content:space-between"><span>${esc(w)}</span><b>${n}</b></div><div class="weak-bar"><span style="width:${100*n/max}%"></span></div></div>`).join(""):'<div class="empty">Weakness patterns will appear after you log attempts.</div>';
+}
+function renderTopicCoverage(){
+ const el=document.getElementById("topicCoverage");if(!el)return;
+ const groups={};
+ CASE_BANK.forEach(c=>{
+   if(!groups[c.domain])groups[c.domain]={total:0,done:0,repeat:0,ready:0};
+   const g=groups[c.domain],s=caseSummary(c.id);g.total++;
+   if(s.attempts.length||s.done)g.done++;
+   if(s.mastery==="Needs repeat")g.repeat++;
+   if(s.mastery==="Exam ready")g.ready++;
+ });
+ el.innerHTML=`<table><thead><tr><th>Domain</th><th>Attempted</th><th>Needs repeat</th><th>Exam ready</th></tr></thead><tbody>${
+   Object.entries(groups).sort((a,b)=>a[0].localeCompare(b[0])).map(([d,g])=>`<tr><td><b>${esc(d)}</b></td><td>${g.done}/${g.total}</td><td>${g.repeat}</td><td>${g.ready}</td></tr>`).join("")
+ }</tbody></table>`;
+}
+function openAttempt(id){
+ const c=CASE_BANK.find(x=>x.id===id);if(!c)return;
+ document.getElementById("attemptCaseId").value=id;
+ document.getElementById("attemptTitle").textContent="Log attempt — "+c.title;
+ document.getElementById("attemptDate").value=dateISO();
+ document.getElementById("attemptOutcome").value="Needs repeat";
+ document.getElementById("attemptNotes").value="";
+ document.getElementById("weaknessChecks").innerHTML=WEAKNESS_TAGS.map((w,i)=>`<label class="check-line"><input type="checkbox" value="${esc(w)}"> <span>${esc(w)}</span></label>`).join("");
+ document.getElementById("attemptModal").classList.add("open");
+}
+function closeAttempt(){document.getElementById("attemptModal").classList.remove("open");}
+document.getElementById("closeAttempt").onclick=closeAttempt;
+document.getElementById("cancelAttempt").onclick=closeAttempt;
+document.getElementById("saveAttempt").onclick=()=>{
+ const id=document.getElementById("attemptCaseId").value;
+ const s=state.caseBank[id];if(!s)return;
+ const weak=[...document.querySelectorAll("#weaknessChecks input:checked")].map(x=>x.value);
+ const attempt={date:document.getElementById("attemptDate").value||dateISO(),outcome:document.getElementById("attemptOutcome").value,weak,notes:document.getElementById("attemptNotes").value.trim()};
+ s.attempts=s.attempts||[];s.attempts.push(attempt);s.done=true;s.feedback=true;
+ const summary=caseSummary(id);s.mastery=summary.mastery;
+ closeAttempt();save();
+};
+
+function rubricStats(){
+ if(!state.cases.length)return [];
+ return RUBRIC_NAMES.map((name,i)=>({name,avg:state.cases.reduce((a,c)=>a+(Number(c.scores[i])||0),0)/state.cases.length}));
+}
+function refreshCases(){
+ document.getElementById("caseTotal").textContent=state.cases.length;
+ const totals=state.cases.map(c=>c.scores.reduce((a,b)=>a+Number(b),0));
+ document.getElementById("caseScoreAvg").textContent=totals.length?(totals.reduce((a,b)=>a+b,0)/totals.length).toFixed(1):"—";
+ const rs=rubricStats().sort((a,b)=>a.avg-b.avg);
+ document.getElementById("weakDomain").textContent=rs.length?rs[0].name:"—";
+ const td=dateISO(); document.getElementById("repeatDue").textContent=state.cases.filter(c=>c.repeat&&c.repeat<=td).length;
+ const list=document.getElementById("caseList");
+ const arr=state.cases.slice().sort((a,b)=>b.date.localeCompare(a.date));
+ list.innerHTML=arr.length?arr.map(c=>{
+  const total=c.scores.reduce((a,b)=>a+Number(b),0);
+  const ctx=(c.context||[]).length;
+  return `<div class="case-card">
+   <div class="case-head"><div><div class="case-title">${esc(c.title)}</div><div class="meta">${esc(c.date)} · ${esc(c.source)} · ${c.timed==="yes"?"Timed":"Untimed"}${c.repeat?` · Repeat ${esc(c.repeat)}`:""}</div></div>
+   <div class="row"><span class="pill">${total}/35</span><span class="pill blue">${ctx}/${CONTEXT.length} context</span><button class="btn small danger delete-case" data-id="${c.id}">Delete</button></div></div>
+   <div class="score-grid">${c.scores.map((s,i)=>`<div class="score-box"><small>${RUBRIC_NAMES[i]}</small><b>${s}/7</b></div>`).join("")}</div>
+   ${c.notes?`<div class="callout" style="margin-top:10px"><b>Repair:</b> ${esc(c.notes)}</div>`:""}
+  </div>`;
+ }).join(""):'<div class="empty card">Log your first case. Start with a baseline case from a domain you think you are already good at.</div>';
+ list.querySelectorAll(".delete-case").forEach(b=>b.onclick=()=>{if(confirm("Delete this case?")){state.cases=state.cases.filter(c=>String(c.id)!==String(b.dataset.id));save();}});
+}
+function openCase(title=""){
+ document.getElementById("caseModal").classList.add("open");
+ document.getElementById("caseDate").value=dateISO();
+ document.getElementById("caseTitle").value=title;
+ const d=new Date();d.setDate(d.getDate()+3);document.getElementById("caseRepeat").value=dateISO(d);
+ ["s1","s2","s3","s4","s5"].forEach(id=>document.getElementById(id).value=4);
+ document.getElementById("caseNotes").value="";
+ document.getElementById("modalContextChecks").innerHTML=CONTEXT.map(([a],i)=>`<label class="check-line"><input type="checkbox" value="${i}"> <span>${esc(a)}</span></label>`).join("");
+}
+function closeCase(){document.getElementById("caseModal").classList.remove("open");}
+document.getElementById("addCaseBtn").onclick=()=>openCase();
+document.getElementById("closeModal").onclick=closeCase;document.getElementById("cancelCase").onclick=closeCase;
+document.getElementById("saveCase").onclick=()=>{
+ const title=document.getElementById("caseTitle").value.trim(); if(!title){alert("Add a case title.");return;}
+ const scores=["s1","s2","s3","s4","s5"].map(id=>clamp(Number(document.getElementById(id).value)||0,0,7));
+ const context=[...document.querySelectorAll("#modalContextChecks input:checked")].map(x=>Number(x.value));
+ state.cases.push({id:Date.now(),date:document.getElementById("caseDate").value||dateISO(),source:document.getElementById("caseSource").value,title,timed:document.getElementById("caseTimed").value,repeat:document.getElementById("caseRepeat").value,scores,context,notes:document.getElementById("caseNotes").value.trim()});
+ closeCase();save();
+};
+
+function renderContext(){
+ document.getElementById("contextGrid").innerHTML=CONTEXT.map(([a,b])=>`<div class="ctx"><strong>${esc(a)}</strong><span>${esc(b)}</span></div>`).join("");
+}
+function renderPast(){
+ const tbody=document.getElementById("pastTable");
+ tbody.innerHTML=PAST.map((p,i)=>`<tr><td>${p.year}</td><td><b>${esc(p.topics)}</b></td><td>${esc(p.domain)}</td><td><select class="past-status" data-i="${i}">${STATUS.map(s=>`<option ${(state.pastStatus[i]||"Not started")===s?"selected":""}>${s}</option>`).join("")}</select></td></tr>`).join("");
+ tbody.querySelectorAll(".past-status").forEach(s=>s.onchange=()=>{state.pastStatus[s.dataset.i]=s.value;save();});
+}
+function renderTimeline(){document.getElementById("timeline").innerHTML=PLAN.map(([d,n,p])=>`<div class="phase"><b>${esc(d)} · ${esc(n)}</b><p>${esc(p)}</p></div>`).join("");}
+function renderResources(){
+ document.getElementById("resourceList").innerHTML=RESOURCES.map(([n,r,u])=>`<div class="mini-stat"><span><b>${esc(n)}</b><br><small>${esc(u)}</small></span><span class="pill">${esc(r)}</span></div>`).join("");
+}
+function renderAnki(){
+ const arr=state.anki.slice().sort((a,b)=>b.date.localeCompare(a.date));
+ const weekStart=new Date(); weekStart.setDate(weekStart.getDate()-6); const ws=dateISO(weekStart);
+ const week=arr.filter(x=>x.date>=ws);
+ const rev=week.reduce((a,x)=>a+Number(x.reviews),0), nw=week.reduce((a,x)=>a+Number(x.newCards),0);
+ document.getElementById("ankiStats").innerHTML=`<div class="mini-stat"><span>Reviews, last 7 days</span><b>${rev}</b></div><div class="mini-stat"><span>New cards, last 7 days</span><b>${nw}</b></div>`+(arr.slice(0,5).map(x=>`<div class="mini-stat"><span>${esc(x.date)}</span><span>${x.reviews} reviews · ${x.newCards} new</span></div>`).join("")||'<div class="empty">No Anki logs yet.</div>');
+}
+document.getElementById("ankiDate").value=dateISO();
+document.getElementById("ankiAdd").onclick=()=>{
+ state.anki.push({date:document.getElementById("ankiDate").value||dateISO(),reviews:Number(document.getElementById("ankiReviews").value)||0,newCards:Number(document.getElementById("ankiNew").value)||0});
+ document.getElementById("ankiReviews").value=0;document.getElementById("ankiNew").value=0;save();
+};
+document.getElementById("exportBtn").onclick=()=>{
+ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="paeds-stamps-study-backup-"+dateISO()+".json";a.click();URL.revokeObjectURL(a.href);
+};
+document.getElementById("importFile").onchange=e=>{
+ const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);save();alert("Backup imported.");}catch(err){alert("That file could not be imported.");}};r.readAsText(f);
+};
+
+function refreshAll(){refreshHome();renderCurriculum();renderCaseBank();refreshCases();renderContext();renderPast();renderTimeline();renderResources();renderAnki();}
+refreshAll();
+</script>
+
+<div class="modal" id="attemptModal">
+ <div class="modal-card">
+  <div class="row" style="justify-content:space-between"><h2 id="attemptTitle">Log practice attempt</h2><button class="btn small" id="closeAttempt">Close</button></div>
+  <input type="hidden" id="attemptCaseId">
+  <div class="form-grid">
+    <div><label>Date</label><input id="attemptDate" type="date" style="width:100%"></div>
+    <div><label>Outcome</label>
+      <select id="attemptOutcome" style="width:100%">
+        <option>Major gaps</option><option selected>Needs repeat</option><option>Solid</option><option>Exam ready</option>
+      </select>
+    </div>
+    <div class="full"><label>What needs work? Tick everything that applied</label>
+      <div class="check-list" id="weaknessChecks"></div>
+    </div>
+    <div class="full"><label>Feedback / repair note</label><textarea id="attemptNotes" placeholder="e.g. I missed early retrieval; differential was too broad; strong clinical content but did not use local resources; repeat after revising neonatal sepsis."></textarea></div>
+  </div>
+  <div class="footer-actions"><button class="btn" id="cancelAttempt">Cancel</button><button class="btn primary" id="saveAttempt">Save attempt</button></div>
+ </div>
+</div>
+
+</body>
+</html>
